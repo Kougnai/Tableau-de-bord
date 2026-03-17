@@ -268,17 +268,28 @@ with tab5:
             m.fit(df_p)
             return m
 
-        # --- RÉCUPÉRATION MÉTÉO RÉELLE (7j) ---
+       # --- RÉCUPÉRATION MÉTÉO RÉELLE (7j) ---
         @st.cache_data(ttl=3600) # Cache de 1h pour la météo
         def get_forecast_weather():
             url = "https://api.open-meteo.com/v1/forecast?latitude=45.89&longitude=6.12&daily=temperature_2m_max,precipitation_sum&timezone=Europe/Berlin"
-            r = requests.get(url).json()
-            return pd.DataFrame({
-                'ds': pd.to_datetime(r['daily']['time']),
-                'temp': r['daily']['temperature_2m_max'],
-                'pluie': r['daily']['precipitation_sum']
-            })
+            try:
+                response = requests.get(url, timeout=10)
+                response.raise_for_status() # Vérifie si la requête a réussi (code 200)
+                r = response.json()
+                
+                # Vérification de la présence de la clé 'daily'
+                if 'daily' not in r:
+                    st.error("L'API météo n'a pas renvoyé de données 'daily'. Vérifiez l'URL ou le service.")
+                    return pd.DataFrame() # Retourne un DF vide pour éviter le crash
 
+                return pd.DataFrame({
+                    'ds': pd.to_datetime(r['daily']['time']),
+                    'temp': r['daily']['temperature_2m_max'],
+                    'pluie': r['daily']['precipitation_sum']
+                })
+            except Exception as e:
+                st.error(f"Erreur lors de la récupération météo : {e}")
+                return pd.DataFrame()
         with st.spinner('L\'IA analyse vos données...'):
             # 1. Entraînement sur les données filtrées du PV choisi
             model = train_prophet_model(df_filtered)
