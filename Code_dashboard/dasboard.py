@@ -269,7 +269,7 @@ with tab5:
             return m
 
        # --- RÉCUPÉRATION MÉTÉO RÉELLE (7j) ---
-        @st.cache_data(ttl=3600) # Cache de 1h pour la météo
+        @st.cache_data(ttl=86400) # Cache de 1h pour la météo
         def get_forecast_weather():
             url = "https://api.open-meteo.com/v1/forecast?latitude=45.89&longitude=6.12&daily=temperature_2m_max,precipitation_sum&timezone=Europe/Berlin"
             try:
