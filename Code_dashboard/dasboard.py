@@ -10,7 +10,7 @@ st.set_page_config(page_title="Analytics Restaurant GS", layout="wide")
 # --- CHARGEMENT DES DONNÉES ---
 @st.cache_data 
 def load_data():
-    path = 'Code_dashboard/Master_dater_GS_clean.csv'
+    path = 'Data/Master_dater_GS_clean.csv'
     df = pd.read_csv(path)
     df["date"] = pd.to_datetime(df["date"])
     df["n_jour"] = df["date"].dt.dayofweek
